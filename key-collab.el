@@ -46,6 +46,16 @@
       (with-httpd-buffer (pop best-clients) "application/json"
         (insert (json-encode best))))))
 
+(defun save-best ()
+  (with-temp-file (expand-file-name "best" key-collab-data-root)
+    (prin1 best (current-buffer))))
+
+(defun load-best ()
+  (with-temp-buffer
+    (insert-file-contents-literally
+     (expand-file-name "best" key-collab-data-root))
+    (setq best (read (current-buffer)))))
+
 (defservlet report text/plain (path args request)
   (let* ((report (json-read-from-string (cadr (assoc "Content" request))))
          (key (cdr (assoc 'key report)))
@@ -53,4 +63,7 @@
          (score (score key)))
     (when (> score (first best))
       (setq best (list score key name))
+      (save-best)
       (update-clients))))
+
+(load-best)

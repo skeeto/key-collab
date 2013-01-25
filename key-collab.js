@@ -1,6 +1,6 @@
 var best = {score: -1};
 var overall = {score: -1};
-var name = null;
+var name = localStorage.name || "anonymous";
 
 function report(key) {
     $.post('report', JSON.stringify({
@@ -23,6 +23,13 @@ $(document).ready(function() {
             report(best.key);
         }
     });
+
+    $('form').bind('submit', function() { return false; });
+    $('#name').bind('change', function() {
+        name = $('#name').val();
+        localStorage.name = name;
+    });
+    $('#name').val(name);
 
     function getUpdate() {
         $.getJSON('/best?score=' + overall.score, function(result) {

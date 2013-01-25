@@ -1,9 +1,24 @@
 body {
     font-family: sans;
+    background: lightblue;
+    max-width: 800px;
+    margin: auto auto;
+}
+
+#credit {
+    text-align: center;
+    background: white;
+    margin: 20px 0;
+    padding: 10px;
+}
+
+#status {
+    background: white;
+    padding: 30px;
 }
 
 .best {
-    margin: 10px 0;
+    margin: 15px 0;
 }
 
 .label {
@@ -31,5 +46,13 @@ body {
 
 .name {
     font-style: italic;
+}
 
+input {
+    border: solid black 1px;
+    background: white;
+    padding: 3px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
 }

@@ -38,7 +38,7 @@ function encodeWith(key) {
 };
 
 function run(words) {
-    var threshold = 30;
+    var threshold = 60;
     while (true) {
         var key = genkey();
         var score = words.map(encodeWith(key)).filter(sorted).length;
