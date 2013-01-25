@@ -24,7 +24,7 @@ $(document).ready(function() {
             report(best.key);
         }
         var counter = result.counter;
-        var rate = ((Date.now() - start) / counter).toFixed(1);
+        var rate = (counter / ((Date.now() - start) / 1000)).toFixed(1);
         var msg = counter + ' keys tried (' + rate + ' / sec)';
         $('#personal-best-count').text(msg);
     });
