@@ -38,12 +38,17 @@ function encodeWith(key) {
 };
 
 function run(words) {
-    var threshold = 60;
+    var threshold = 35;
+    var counter = 0;
     while (true) {
+        counter++;
         var key = genkey();
         var score = words.map(encodeWith(key)).filter(sorted).length;
         if (score > threshold) {
-            self.postMessage('{"score":' + score + ',"key":"' + key + '"}');
+            self.postMessage('{' +
+                             '"score":'   + score + ',' +
+                             '"key":'     + '"' + key + '",' +
+                             '"counter":' + counter + '}');
         }
     }
 }

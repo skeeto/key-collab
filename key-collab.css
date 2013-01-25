@@ -66,6 +66,9 @@ h2 {
     font-weight: bold;
     font-size: 110%;
     margin: 0 10px;
+    width: 60px;
+    display: inline-block;
+    text-align: center;
 }
 
 .name {

@@ -10,6 +10,7 @@ function report(key) {
 }
 
 $(document).ready(function() {
+    var start = new Date();
     var worker = new Worker("worker.js");
     $.get('words', function(words) {
         worker.postMessage(words);
@@ -22,6 +23,10 @@ $(document).ready(function() {
             $('#personal-best-score').text(result.score);
             report(best.key);
         }
+        var counter = result.counter;
+        var rate = ((Date.now() - start) / counter).toFixed(1);
+        var msg = counter + ' keys tried (' + rate + ' / sec)';
+        $('#personal-best-count').text(msg);
     });
 
     $('form').bind('submit', function() { return false; });
