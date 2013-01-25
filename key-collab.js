@@ -1,4 +1,5 @@
 var best = {score: -1};
+var overall = {score: -1};
 var name = null;
 
 function report(key) {
@@ -22,4 +23,17 @@ $(document).ready(function() {
             report(best.key);
         }
     });
+
+    function getUpdate() {
+        $.getJSON('/best?score=' + overall.score, function(result) {
+            overall.score = result[0];
+            overall.key = result[1];
+            overall.name = result[2] || "anonymous";
+            $('#overall-best-score').text(overall.score);
+            $('#overall-best-key').text(overall.key);
+            $('#overall-best-name').text(overall.name);
+            getUpdate();
+        });
+    }
+    getUpdate();
 });

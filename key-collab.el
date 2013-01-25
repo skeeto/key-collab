@@ -25,10 +25,26 @@
 
 ;; Server
 
-(defvar best '(-1 "" nil))
+(defvar best '(0 "--------------------------" nil))
 
 (defservlet words application/json ()
   (insert words-json))
+
+(defvar best-clients ())
+
+(defun httpd/best (proc path args request)
+  (let ((known (or (cadr (assoc "score" args)) "0")))
+    (setq a args)
+    (if (not (= (string-to-number known) (first best)))
+        (with-httpd-buffer proc "application/json"
+          (insert (json-encode best)))
+      (push proc best-clients))))
+
+(defun update-clients ()
+  (while best-clients
+    (ignore-errors
+      (with-httpd-buffer (pop best-clients) "application/json"
+        (insert (json-encode best))))))
 
 (defservlet report text/plain (path args request)
   (let* ((report (json-read-from-string (cadr (assoc "Content" request))))
@@ -36,4 +52,5 @@
          (name (cdr (assoc 'name report)))
          (score (score key)))
     (when (> score (first best))
-      (setq best (list score key name)))))
+      (setq best (list score key name))
+      (update-clients))))

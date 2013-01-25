@@ -26,5 +26,10 @@ body {
 .score {
     font-weight: bold;
     font-size: 110%;
-    margin-left: 10px;
+    margin: 0 10px;
+}
+
+.name {
+    font-style: italic;
+
 }
