@@ -1,0 +1,30 @@
+body {
+    font-family: sans;
+}
+
+.best {
+    margin: 10px 0;
+}
+
+.label {
+    display: inline-block;
+    width: 150px;
+    font-weight: bold;
+}
+
+.label:after {
+    content: ": ";
+}
+
+.key {
+    display: inline-block;
+    border: solid black 1px;
+    padding: 5px 10px;
+    font-family: monospace;
+}
+
+.score {
+    font-weight: bold;
+    font-size: 110%;
+    margin-left: 10px;
+}
