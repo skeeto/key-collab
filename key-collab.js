@@ -31,7 +31,10 @@ $(document).ready(function() {
         $('#personal-best-count').text(msg);
     });
 
-    $('form').bind('submit', function() { return false; });
+    $('form').bind('submit', function() {
+        $('#name').blur();
+        return false;
+    });
     $('#name').bind('change', function() {
         name = $('#name').val();
         localStorage.name = name;
