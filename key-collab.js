@@ -21,7 +21,9 @@ $(document).ready(function() {
             best = result;
             $('#personal-best-key').text(result.key);
             $('#personal-best-score').text(result.score);
-            report(best.key);
+        }
+        if (result.score > Math.max(overall.score, best.score)) {
+            report(result.key);
         }
         var counter = result.counter;
         var rate = (counter / ((Date.now() - start) / 1000)).toFixed(1);
