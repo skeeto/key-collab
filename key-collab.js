@@ -17,13 +17,13 @@ $(document).ready(function() {
     }, 'text');
     worker.addEventListener('message', function(event) {
         var result = JSON.parse(event.data);
+        if (result.score > Math.max(overall.score, best.score)) {
+            report(result.key);
+        }
         if (result.score > best.score) {
             best = result;
             $('#personal-best-key').text(result.key);
             $('#personal-best-score').text(result.score);
-        }
-        if (result.score > Math.max(overall.score, best.score)) {
-            report(result.key);
         }
         var counter = result.counter;
         var rate = (counter / ((Date.now() - start) / 1000)).toFixed(1);
