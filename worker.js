@@ -38,7 +38,7 @@ function encodeWith(key) {
 };
 
 function run(words) {
-    var threshold = 35;
+    var threshold = 40;
     var counter = 0;
     while (true) {
         counter++;
