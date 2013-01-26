@@ -51,6 +51,7 @@ h2 {
     display: inline-block;
     width: 150px;
     font-weight: bold;
+    height: 25px;
 }
 
 .label:after {
