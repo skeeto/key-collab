@@ -22,7 +22,9 @@
   (string= (sort* (copy-seq word) #'<) word))
 
 (defun score (key)
-  (count-if #'sorted-p (mapcar (apply-partially #'encode key) words)))
+  (if (= 26 (length (remove-duplicates key)))
+      (count-if #'sorted-p (mapcar (apply-partially #'encode key) words))
+    0))
 
 ;; Server
 
