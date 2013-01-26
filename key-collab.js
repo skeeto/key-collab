@@ -3,6 +3,7 @@ var overall = {score: -1};
 var name = localStorage.name || "anonymous";
 var id = Math.floor(Math.random() * 0xffffff).toString(16);
 
+/* Report KEY to the server. */
 function report(key) {
     $.post('report', JSON.stringify({
         key: key,
@@ -11,12 +12,14 @@ function report(key) {
 }
 
 $(document).ready(function() {
+    /* Fire off the web worker. */
     var start = new Date();
     var worker = new Worker("worker.js");
     $.get('words', function(words) {
         worker.postMessage(words);
     }, 'text');
 
+    /* Get updates from the worker. */
     var lastCpuReport = 0;
     worker.addEventListener('message', function(event) {
         var result = JSON.parse(event.data);
@@ -33,6 +36,7 @@ $(document).ready(function() {
         var msg = counter + ' keys tried (' + result.rate + ' / sec)';
         $('#personal-best-count').text(msg);
 
+        /* Report CPU information to the server. */
         if (lastCpuReport < Date.now() - 10000) {
             var report = {
                 id: id,
@@ -47,6 +51,7 @@ $(document).ready(function() {
         }
     });
 
+    /* Manage the form. */
     $('form').bind('submit', function() {
         $('#name').blur();
         return false;
@@ -57,6 +62,7 @@ $(document).ready(function() {
     });
     $('#name').val(name);
 
+    /* Get solution updates from the server. */
     function getUpdate() {
         $.getJSON('/best?score=' + overall.score, function(result) {
             overall.score = result[0];

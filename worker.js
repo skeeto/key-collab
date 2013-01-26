@@ -2,6 +2,7 @@
 
 var alphabet = "abcdefghijklmnopqrstuvwxyz";
 
+/* Standard Fisher-Yates shuffle. Mutates the provided array. */
 function fisherYates(array) {
     var j, tempi, tempj;
     for (var i = 0; i < array.length; i++) {
@@ -14,6 +15,7 @@ function fisherYates(array) {
     return array;
 }
 
+/* Generate a key at random. */
 function genkey() {
     var perm = fisherYates(alphabet.split('')).join('');
     var key = {toString: function() { return perm;} };
@@ -23,6 +25,7 @@ function genkey() {
     return key;
 }
 
+/* Encode WORD with KEY. */
 function encode(key, word) {
     var split = word.split('');
     var output = new Array(split.length);
@@ -32,6 +35,7 @@ function encode(key, word) {
     return output.join('');
 }
 
+/* Return T if WORD's letters are sorted. */
 function sorted(word) {
     for (var i = 1; i < word.length; i++) {
         if (word[i - 1].localeCompare(word[i]) > 0) return false;
@@ -39,12 +43,14 @@ function sorted(word) {
     return true;
 }
 
+/* Return a function that encodes a word with KEY. */
 function encodeWith(key) {
     return function(word) {
         return encode(key, word);
     };
 };
 
+/* Endlessly try different keys. */
 function run(words) {
     var threshold = 50;
     var counter = 0;
