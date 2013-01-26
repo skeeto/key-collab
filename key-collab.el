@@ -1,6 +1,7 @@
 (require 'cl)
 (require 'json)
 (require 'simple-httpd)
+(require 'cache-table)
 
 (defvar key-collab-data-root "~/src/scratch/key-collab")
 
@@ -65,5 +66,16 @@
       (setq best (list score key name))
       (save-best)
       (update-clients))))
+
+(defvar global-cpu (make-cache-table 30 :test 'equal))
+
+(defservlet cpu application/json (path args request)
+  (let* ((report (json-read-from-string (cadr (assoc "Content" request))))
+         (rate (string-to-number (cdr (assoc 'rate report))))
+         (id (cdr (assoc 'id report)))
+         (total 0))
+    (setf (get-cache-table id global-cpu) rate)
+    (cache-table-map (lambda (k v) (incf total v)) global-cpu)
+    (insert (json-encode `((rate . ,total))))))
 
 (load-best)

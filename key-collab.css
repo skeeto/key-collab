@@ -75,6 +75,12 @@ h2 {
     font-style: italic;
 }
 
+.rate {
+    font-weight: bold;
+    width: 600px;
+    text-align: center;
+}
+
 input {
     border: solid black 1px;
     background: #DFA;

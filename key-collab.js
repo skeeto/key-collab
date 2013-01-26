@@ -1,6 +1,7 @@
 var best = {score: -1};
 var overall = {score: -1};
 var name = localStorage.name || "anonymous";
+var id = Math.floor(Math.random() * 0xffffff).toString(16);
 
 function report(key) {
     $.post('report', JSON.stringify({
@@ -15,6 +16,8 @@ $(document).ready(function() {
     $.get('words', function(words) {
         worker.postMessage(words);
     }, 'text');
+
+    var lastCpuReport = 0;
     worker.addEventListener('message', function(event) {
         var result = JSON.parse(event.data);
         if (result.score > Math.max(overall.score, best.score)) {
@@ -26,9 +29,21 @@ $(document).ready(function() {
             $('#personal-best-score').text(result.score);
         }
         var counter = result.counter;
-        var rate = (counter / ((Date.now() - start) / 1000)).toFixed(1);
-        var msg = counter + ' keys tried (' + rate + ' / sec)';
+        result.rate = (counter / ((Date.now() - start) / 1000)).toFixed(1);
+        var msg = counter + ' keys tried (' + result.rate + ' / sec)';
         $('#personal-best-count').text(msg);
+
+        if (lastCpuReport < Date.now() - 10000) {
+            var report = {
+                id: id,
+                rate: result.rate,
+                counter: result.counter
+            };
+            $.post('cpu', JSON.stringify(report), function(global) {
+                $('#global-rate').text(global.rate.toFixed(1) + ' keys / sec');
+            }, 'json');
+            lastCpuReport = Date.now();
+        }
     });
 
     $('form').bind('submit', function() {
