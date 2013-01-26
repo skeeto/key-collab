@@ -75,6 +75,7 @@
          (total 0))
     (setf (get-cache-table id global-cpu) rate)
     (cache-table-map (lambda (k v) (incf total v)) global-cpu)
-    (insert (json-encode `((rate . ,total))))))
+    (insert (json-encode `((rate . ,total)
+                           (clients . ,(cache-table-count global-cpu)))))))
 
 (load-best)

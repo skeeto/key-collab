@@ -41,6 +41,7 @@ $(document).ready(function() {
             };
             $.post('cpu', JSON.stringify(report), function(global) {
                 $('#global-rate').text(global.rate.toFixed(1) + ' keys / sec');
+                $('#global-clients').text(global.clients + ' clients');
             }, 'json');
             lastCpuReport = Date.now();
         }
