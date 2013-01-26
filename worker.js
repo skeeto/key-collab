@@ -15,13 +15,21 @@ function fisherYates(array) {
 }
 
 function genkey() {
-    return fisherYates(alphabet.split('')).join('');
+    var perm = fisherYates(alphabet.split('')).join('');
+    var key = {toString: function() { return perm;} };
+    for (var i = 0; i < perm.length; i++) {
+        key[perm[i]] = alphabet[i];
+    }
+    return key;
 }
 
 function encode(key, word) {
-    return word.replace(/./g, function(c) {
-        return key[alphabet.indexOf(c)];
-    });
+    var split = word.split('');
+    var output = new Array(split.length);
+    for (var i = 0; i < split.length; i++) {
+        output[i] = key[split[i]];
+    }
+    return output.join('');
 }
 
 function sorted(word) {
@@ -38,7 +46,7 @@ function encodeWith(key) {
 };
 
 function run(words) {
-    var threshold = 40;
+    var threshold = 50;
     var counter = 0;
     while (true) {
         counter++;
