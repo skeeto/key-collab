@@ -35,7 +35,6 @@
 
 (defun httpd/best (proc path args request)
   (let ((known (or (cadr (assoc "score" args)) "0")))
-    (setq a args)
     (if (not (= (string-to-number known) (first best)))
         (with-httpd-buffer proc "application/json"
           (insert (json-encode best)))
