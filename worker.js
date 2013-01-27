@@ -24,33 +24,38 @@ String.prototype.isSorted = function() {
     return true;
 };
 
-function Key(derive, n) {
-    var source = derive === undefined ? Key.alphabet : derive.key;
-    n = n === undefined ? source.length : n;
+function Key(keystring) {
+    this.key = keystring;
+    this.count = Key.counter++;
+    for (var j = 0; j < this.key.length; j++) {
+        this[Key.ALPHABET[j]] = this.key[j];
+    }
+    this.score = 0;
+    for (var i = 0; i < Key.words.length; i++) {
+        if (this.encode(Key.words[i]).isSorted()) {
+            this.score++;
+        }
+    }
+}
 
-    var base = source.split('');
+Key.ALPHABET = "abcdefghijklmnopqrstuvwxyz";
+Key.counter = 0;
+
+Key.generate = function() {
+    return new Key(Key.ALPHABET.split('').shuffle().join(''));
+};
+
+Key.prototype.derive = function(n) {
+    var base = this.key.split('');
     for (var i = 0; i < n; i++) {
         base.swap(Math.randomN(base.length),
                   Math.randomN(base.length));
     }
-    this.key = base.join('');
-    this.count = Key.counter++;
-
-    /* Create a quick-lookup table. */
-    for (var j = 0; j < this.key.length; j++) {
-        this[Key.alphabet[j]] = this.key[j];
-    }
-}
-
-Key.counter = 0;
-Key.alphabet = "abcdefghijklmnopqrstuvwxyz";
-
-Key.fromString = function(string) {
-    return new Key({key: string}, 0);
+    return new Key(base.join(''));
 };
 
 Key.prototype.toString = function() {
-    return this.key;
+    return '[Key "' + this.key + '" ' + this.score + ']';
 };
 
 Key.prototype.encode = function(word) {
@@ -61,38 +66,28 @@ Key.prototype.encode = function(word) {
     return output.join('');
 };
 
-Key.prototype.score = function() {
-    if (!this._score) {
-        this._score = 0;
-        for (var i = 0; i < Key.words.length; i++) {
-            if (this.encode(Key.words[i]).isSorted()) {
-                this._score++;
-            }
-        }
-    }
-    return this._score;
-};
-
 function report(key) {
     self.postMessage(JSON.stringify({
         key: key.key,
-        score: key.score(),
+        score: key.score,
         count: key.count,
         counter: Key.counter
     }));
 }
 
 function run() {
-    var key = new Key();
+    var key = Key.generate();
     var counter = 0;
-    var restart = 256;
     while (true) {
-        if (Key.counter % 40 === 0) report(key);
+        if (Key.counter % 157 === 0) report(key);
         counter++;
         var mutate = Math.ceil(Math.pow(counter / 325, 3));
-        var next = new Key(key, mutate);
-        if (next.score() > key.score() || mutate >= Key.alphabet.length) {
+        var next = key.derive(mutate);
+        if (next.score > key.score) {
             key = next;
+            counter = 0;
+        } else if (mutate >= key.key.length) {
+            key = Key.generate();
             counter = 0;
         }
     }
