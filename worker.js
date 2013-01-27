@@ -1,4 +1,4 @@
-//"use strict";
+"use strict";
 
 Math.randomN = function(n) {
     return Math.floor(Math.random() * n);
