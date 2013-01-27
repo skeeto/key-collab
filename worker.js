@@ -89,7 +89,7 @@ function run() {
     while (true) {
         if (Key.counter % 40 === 0) report(key);
         counter++;
-        var mutate = Math.max(Math.floor(Math.log(Math.pow(counter, 4.2))), 1);
+        var mutate = Math.ceil(Math.pow(counter / 325, 3));
         var next = new Key(key, mutate);
         if (next.score() > key.score() || mutate >= Key.alphabet.length) {
             key = next;
