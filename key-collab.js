@@ -1,4 +1,4 @@
-var version = 2;
+var version = 3;
 
 var best = {score: -1};
 var overall = {score: -1};
