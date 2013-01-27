@@ -96,7 +96,7 @@
   "Current global CPU rate. Stale data is dropped after 30 seconds.")
 
 (defvar key-collab-message nil)
-(defvar key-collab-version 3)
+(defvar key-collab-version 6)
 
 (defservlet cpu application/json (path args request)
   "Accept a CPU rate from a client."
