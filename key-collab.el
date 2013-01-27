@@ -95,6 +95,9 @@
 (defvar global-cpu (make-cache-table 30 :test 'equal)
   "Current global CPU rate. Stale data is dropped after 30 seconds.")
 
+(defvar key-collab-message nil)
+(defvar key-collab-version 2)
+
 (defservlet cpu application/json (path args request)
   "Accept a CPU rate from a client."
   (let* ((report (json-read-from-string (cadr (assoc "Content" request))))
@@ -104,7 +107,9 @@
     (setf (get-cache-table id global-cpu) rate)
     (cache-table-map (lambda (k v) (incf total v)) global-cpu)
     (insert (json-encode `((rate . ,total)
-                           (clients . ,(cache-table-count global-cpu)))))))
+                           (clients . ,(cache-table-count global-cpu))
+                           (message . ,key-collab-message)
+                           (version . ,key-collab-version))))))
 
 (load-best)
 

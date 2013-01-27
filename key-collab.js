@@ -1,3 +1,5 @@
+var version = 2;
+
 var best = {score: -1};
 var overall = {score: -1};
 var name = localStorage.name || "anonymous";
@@ -49,6 +51,17 @@ $(document).ready(function() {
             $.post('cpu', JSON.stringify(output), function(global) {
                 $('#global-rate').text(global.rate.toFixed(1) + ' keys / sec');
                 $('#global-clients').text(global.clients + ' clients');
+                if (global.version > version) {
+                    location.reload(true);
+                }
+                if (global.message) {
+                    if ($('#message').html() !== global.message) {
+                        $('#message').html(global.message);
+                        $('#message').show();
+                    }
+                } else {
+                    $('#message').hide();
+                }
             }, 'json');
             lastCpuReport = Date.now();
         }

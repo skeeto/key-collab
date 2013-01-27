@@ -39,6 +39,14 @@ h2 {
     font-size: 20px;
 }
 
+#message {
+    display: none;
+    background: pink;
+    font-weight: bold;
+    text-align: center;
+    font-size: 24px;
+}
+
 #info {
     text-align: center;
 }
