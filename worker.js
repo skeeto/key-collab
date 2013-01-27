@@ -1,72 +1,104 @@
-"use strict";
+//"use strict";
 
-var alphabet = "abcdefghijklmnopqrstuvwxyz";
-
-/* Standard Fisher-Yates shuffle. Mutates the provided array. */
-function fisherYates(array) {
-    var j, tempi, tempj;
-    for (var i = 0; i < array.length; i++) {
-        j = Math.floor(Math.random() * (i + 1));
-        tempi = array[i];
-        tempj = array[j];
-        array[i] = tempj;
-        array[j] = tempi;
-    }
-    return array;
-}
-
-/* Generate a key at random. */
-function genkey() {
-    var perm = fisherYates(alphabet.split('')).join('');
-    var key = {toString: function() { return perm;} };
-    for (var i = 0; i < perm.length; i++) {
-        key[perm[i]] = alphabet[i];
-    }
-    return key;
-}
-
-/* Encode WORD with KEY. */
-function encode(key, word) {
-    var split = word.split('');
-    var output = new Array(split.length);
-    for (var i = 0; i < split.length; i++) {
-        output[i] = key[split[i]];
-    }
-    return output.join('');
-}
-
-/* Return T if WORD's letters are sorted. */
-function sorted(word) {
-    for (var i = 1; i < word.length; i++) {
-        if (word[i - 1].localeCompare(word[i]) > 0) return false;
-    }
-    return true;
-}
-
-/* Return a function that encodes a word with KEY. */
-function encodeWith(key) {
-    return function(word) {
-        return encode(key, word);
-    };
+Math.randomN = function(n) {
+    return Math.floor(Math.random() * n);
 };
 
-/* Endlessly try different keys. */
-function run(words) {
-    var threshold = 50;
+Array.prototype.swap = function(i, j) {
+    var temp = this[i];
+    this[i] = this[j];
+    this[j] = temp;
+};
+
+Array.prototype.shuffle = function() {
+    for (var i = 0; i < this.length; i++) {
+        this.swap(i, Math.randomN(i + 1));
+    }
+    return this;
+};
+
+String.prototype.isSorted = function() {
+    for (var i = 1; i < this.length; i++) {
+        if (this[i - 1].localeCompare(this[i]) > 0) return false;
+    }
+    return true;
+};
+
+function Key(derive, n) {
+    var source = derive === undefined ? Key.alphabet : derive.key;
+    n = n === undefined ? source.length : n;
+
+    var base = source.split('');
+    for (var i = 0; i < n; i++) {
+        base.swap(Math.randomN(base.length),
+                  Math.randomN(base.length));
+    }
+    this.key = base.join('');
+    this.count = Key.counter++;
+
+    /* Create a quick-lookup table. */
+    for (var j = 0; j < this.key.length; j++) {
+        this[Key.alphabet[j]] = this.key[j];
+    }
+}
+
+Key.counter = 0;
+Key.alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+Key.fromString = function(string) {
+    return new Key({key: string}, 0);
+};
+
+Key.prototype.toString = function() {
+    return this.key;
+};
+
+Key.prototype.encode = function(word) {
+    var output = new Array(word.length);
+    for (var i = 0; i < word.length; i++) {
+        output[i] = this[word[i]];
+    }
+    return output.join('');
+};
+
+Key.prototype.score = function() {
+    if (!this._score) {
+        this._score = 0;
+        for (var i = 0; i < Key.words.length; i++) {
+            if (this.encode(Key.words[i]).isSorted()) {
+                this._score++;
+            }
+        }
+    }
+    return this._score;
+};
+
+function report(key) {
+    self.postMessage(JSON.stringify({
+        key: key.key,
+        score: key.score(),
+        count: key.count,
+        counter: Key.counter
+    }));
+}
+
+function run() {
+    var key = new Key();
     var counter = 0;
+    var restart = 256;
     while (true) {
+        if (Key.counter % 40 === 0) report(key);
         counter++;
-        var key = genkey();
-        var score = words.map(encodeWith(key)).filter(sorted).length;
-        if (score > threshold) {
-            self.postMessage('{' +
-                             '"score":'   + score + ',' +
-                             '"key":'     + '"' + key + '",' +
-                             '"counter":' + counter + '}');
+        var mutate = Math.max(Math.floor(Math.log(Math.pow(counter, 4.2))), 1);
+        var next = new Key(key, mutate);
+        if (next.score() > key.score() || mutate >= Key.alphabet.length) {
+            key = next;
+            counter = 0;
         }
     }
 }
 
 self.addEventListener('message', function(event) {
-    run(eval(event.data));
+    Key.words = JSON.parse(event.data);
+    run();
 });

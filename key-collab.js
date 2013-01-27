@@ -22,28 +22,31 @@ $(document).ready(function() {
     /* Get updates from the worker. */
     var lastCpuReport = 0;
     worker.addEventListener('message', function(event) {
-        var result = JSON.parse(event.data);
-        if (result.score > Math.max(overall.score, best.score)) {
-            report(result.key);
+        var key = JSON.parse(event.data);
+        if (key.score > Math.max(overall.score, best.score)) {
+            report(key.key);
         }
-        if (result.score > best.score) {
-            best = result;
-            $('#personal-best-key').text(result.key);
-            $('#personal-best-score').text(result.score);
+        if (key.score > best.score) {
+            best = key;
+            $('#personal-best-key').text(key.key);
+            $('#personal-best-score').text(key.score);
         }
-        var counter = result.counter;
-        result.rate = (counter / ((Date.now() - start) / 1000)).toFixed(1);
-        var msg = counter + ' keys tried (' + result.rate + ' / sec)';
+        var counter = key.counter;
+        key.rate = (counter / ((Date.now() - start) / 1000)).toFixed(1);
+        var msg = counter + ' keys tried (' + key.rate + ' / sec)';
         $('#personal-best-count').text(msg);
+        $('#current-key').text(key.key);
+        $('#current-score').text(key.score);
+        $('#current-count').text('key #' + key.count);
 
         /* Report CPU information to the server. */
         if (lastCpuReport < Date.now() - 10000) {
-            var report = {
+            var output = {
                 id: id,
-                rate: result.rate,
-                counter: result.counter
+                rate: key.rate,
+                counter: key.counter
             };
-            $.post('cpu', JSON.stringify(report), function(global) {
+            $.post('cpu', JSON.stringify(output), function(global) {
                 $('#global-rate').text(global.rate.toFixed(1) + ' keys / sec');
                 $('#global-clients').text(global.clients + ' clients');
             }, 'json');
