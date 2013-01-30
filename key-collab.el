@@ -14,7 +14,7 @@
 
 ;; Challenge data
 
-(defvar key-collab-data-root "~/src/scratch/key-collab")
+(defvar key-collab-data-root (file-name-directory load-file-name))
 
 (defvar words
   (with-temp-buffer
@@ -76,10 +76,11 @@
 
 (defun load-best ()
   "Load the best known solution from disk."
-  (with-temp-buffer
-    (insert-file-contents-literally
-     (expand-file-name "best" key-collab-data-root))
-    (setq best (read (current-buffer)))))
+  (let ((file (expand-file-name "best" key-collab-data-root)))
+    (if (file-exists-p file)
+        (with-temp-buffer
+          (insert-file-contents-literally file)
+          (setq best (read (current-buffer)))))))
 
 (defservlet report text/plain (path args request)
   "Receive a report of a better solution from a client."
