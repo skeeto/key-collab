@@ -17,14 +17,11 @@ $(document).ready(function() {
     /* Fire off the web worker. */
     var start = new Date();
     var worker = new Worker("worker.js");
-    $.get('words', function(words) {
-        worker.postMessage(words);
-    }, 'text');
 
     /* Get updates from the worker. */
     var lastCpuReport = 0;
     worker.addEventListener('message', function(event) {
-        var key = JSON.parse(event.data);
+        var key = event.data;
         if (key.score > Math.max(overall.score, best.score)) {
             report(key.key);
         }
