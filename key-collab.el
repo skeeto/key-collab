@@ -14,7 +14,8 @@
 
 ;; Challenge data
 
-(defvar key-collab-data-root (file-name-directory load-file-name))
+(defvar key-collab-data-root
+  (file-name-directory (or load-file-name buffer-file-name)))
 
 (defvar words
   (with-temp-buffer
