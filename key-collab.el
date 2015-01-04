@@ -113,7 +113,11 @@
                            (message . ,key-collab-message)
                            (version . ,key-collab-version))))))
 
-(load-best)
+(defun key-collab-batch ()
+  "Run server in batch mode."
+  (setf httpd-root key-collab-data-root)
+  (load-best)
+  (httpd-batch-start))
 
 (provide 'key-collab)
 
