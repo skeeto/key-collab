@@ -93,7 +93,7 @@
       (save-best)
       (update-clients))))
 
-(defvar global-cpu (make-cache-table 30 :test 'equal)
+(defvar global-cpu (cache-table-create 30 :test 'equal)
   "Current global CPU rate. Stale data is dropped after 30 seconds.")
 
 (defvar key-collab-message nil)
@@ -105,7 +105,7 @@
          (rate (string-to-number (cdr (assoc 'rate report))))
          (id (cdr (assoc 'id report)))
          (total 0))
-    (setf (get-cache-table id global-cpu) rate)
+    (setf (cache-table-get id global-cpu) rate)
     (cache-table-map (lambda (k v) (incf total v)) global-cpu)
     (insert (json-encode `((rate . ,total)
                            (clients . ,(cache-table-count global-cpu))
