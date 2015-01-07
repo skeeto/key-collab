@@ -1,7 +1,7 @@
+CC      = x86_64-w64-mingw32-gcc
 CFLAGS  = -std=c99 -Wall -O3 -g3
-LDFLAGS = -pthread
 
-key-collab : key-collab.c platform_posix.c
+key-collab.exe : key-collab.c platform_mingw.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 wordlist :
@@ -9,11 +9,11 @@ wordlist :
 
 .PHONY : test clean distclean
 
-test : key-collab wordlist
+test : key-collab.exe wordlist
 	./$^ < wordlist
 
 clean :
-	$(RM) key-collab
+	$(RM) key-collab.exe
 
 distclean : clean
 	$(RM) wordlist

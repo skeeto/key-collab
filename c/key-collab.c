@@ -2,12 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdarg.h>
 #include <string.h>
 #include <time.h>
-
-#include <unistd.h>
-#include <pthread.h>
-#include <ncurses.h>
+#include "platform.h"
 
 #define NUM_WORDS 7260
 #define WORD_LEN  6
@@ -23,11 +21,11 @@ static struct {
 } best;
 
 /* NOTE: Assuming an unsigned long int can be read atomically. */
-struct worker {
+struct worker_data {
     int id;
     unsigned long count;
     unsigned long last_count;
-    pthread_mutex_t *ncurses_lock;
+    platform_mutex_t display_lock;
 };
 
 static void wordlist_load(void)
@@ -77,14 +75,26 @@ static inline void key_copy(char *dest, const char *src)
     memcpy(dest, src, KEY_LEN);
 }
 
-static void *worker(void *data)
+static void print(int row, const char *format, ...)
 {
-    struct worker *worker = data;
+    char buffer[80];
+    va_list ap;
+    va_start(ap, format);
+    vsprintf(buffer, format, ap);
+    va_end(ap);
+    printf("\x1b[H");        // move to top left
+    if (row > 0)
+        printf("\x1b[%dB", row); // cursor down
+    puts(buffer);
+}
+
+static void worker(struct worker_data *data)
+{
     char current_key[] = "abcdefghijklmnopqrstuvwxyz";
     key_shuffle(current_key);
     int current_score = key_score(current_key);
 
-    for (int key_count = 0; ; worker->count++, key_count++) {
+    for (int key_count = 0; ; data->count++, key_count++) {
         char temp[KEY_LEN + 1];
         if (key_count > MAX_TRIES) {
             key_shuffle(current_key);
@@ -98,63 +108,59 @@ static void *worker(void *data)
 
         int score = key_score(temp);
         if (score > best.score) {
-            pthread_mutex_lock(worker->ncurses_lock);
+            platform_mutex_lock(data->display_lock);
             if (score > best.score) { // check again under lock
                 best.score = score;
                 key_copy(best.key, current_key);
-                mvprintw(0, 0, "best:     %s (%d)", best.key, best.score);
-                refresh();
+                print(0, "best:     %s (%d)", best.key, best.score);
             }
-            pthread_mutex_unlock(worker->ncurses_lock);
+            platform_mutex_unlock(data->display_lock);
         }
         if (score > current_score) {
             key_copy(current_key, temp);
             current_score = score;
             key_count = 0;
-            pthread_mutex_lock(worker->ncurses_lock);
-            mvprintw(worker->id + 2, 0, "thread %d: %s (%d)",
-                     worker->id, current_key, current_score);
-            refresh();
-            pthread_mutex_unlock(worker->ncurses_lock);
+            platform_mutex_lock(data->display_lock);
+            print(data->id + 2, "thread %d: %s (%d)",
+                  data->id, current_key, current_score);
+            platform_mutex_unlock(data->display_lock);
         }
     }
-    return NULL;
+}
+
+static void clear(void)
+{
+    printf("\x1b[2J");
 }
 
 int main(void)
 {
     srand(time(NULL));
     wordlist_load();
-    initscr();
-    curs_set(0);
-    pthread_mutex_t ncurses_lock;
-    pthread_mutex_init(&ncurses_lock, NULL);
-    int ncores = sysconf(_SC_NPROCESSORS_ONLN);
+    clear();
+    platform_mutex_t display_lock = platform_mutex_create();
+    int ncores = platform_numcores();
 
-    pthread_t workers[ncores];
-    struct worker worker_data[ncores];
+    struct worker_data worker_data[ncores];
     for (int i = 0; i < ncores; i++) {
         worker_data[i].id = i;
         worker_data[i].count = 0;
         worker_data[i].last_count = 0;
-        worker_data[i].ncurses_lock = &ncurses_lock;
-        pthread_create(&workers[i], NULL, worker, &worker_data[i]);
+        worker_data[i].display_lock = display_lock;
+        platform_thread(&worker, &worker_data[i]);
     }
 
     for (;;) {
-        sleep(1);
+        platform_sleep(1);
         int total = 0;
         for (int i = 0; i < ncores; i++) {
             unsigned long count = worker_data[i].count;
             total += count - worker_data[i].last_count;
             worker_data[i].last_count = count;
         }
-        pthread_mutex_lock(&ncurses_lock);
-        mvprintw(1, 0, "rate:     %d keys/sec\n", total);
-        refresh();
-        pthread_mutex_unlock(&ncurses_lock);
+        platform_mutex_lock(display_lock);
+        print(1, "rate:     %d keys/sec\n", total);
+        platform_mutex_unlock(display_lock);
     }
-
-    endwin();
     return 0;
 }
