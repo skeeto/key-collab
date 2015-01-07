@@ -28,10 +28,16 @@ struct worker_data {
     platform_mutex_t display_lock;
 };
 
+extern const char _binary_wordlist_start;
+
 static void wordlist_load(void)
 {
-    for (int i = 0; i < NUM_WORDS; i++)
-        scanf("%s", wordlist[i]);
+    const char *p = &_binary_wordlist_start;
+    for (int i = 0; i < NUM_WORDS; i++) {
+        for (int c = 0; c < WORD_LEN; c++)
+            wordlist[i][c] = *p++;
+        p += 2;
+    }
 }
 
 static int key_score(char *key)

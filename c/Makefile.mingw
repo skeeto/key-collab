@@ -1,19 +1,24 @@
-CC      = x86_64-w64-mingw32-gcc
+HOST    = x86_64-w64-mingw32
+CC      = $(HOST)-gcc
+LD      = $(HOST)-ld
 CFLAGS  = -std=c99 -Wall -O3 -g3
 
-key-collab.exe : key-collab.c platform_mingw.c
+key_collab.exe : key_collab.c platform_mingw.c wordlist_mingw.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+wordlist_mingw.o : wordlist
+	$(LD) -r -b binary -o $@ $^
 
 wordlist :
 	curl -o $@ 'http://pastebin.com/raw.php?i=9aFn1r27'
 
 .PHONY : test clean distclean
 
-test : key-collab.exe wordlist
-	./$^ < wordlist
+test : key_collab.exe wordlist
+	./$^
 
 clean :
-	$(RM) key-collab.exe
+	$(RM) key_collab.exe wordlist_mingw.o
 
 distclean : clean
 	$(RM) wordlist
