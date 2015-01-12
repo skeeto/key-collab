@@ -22,30 +22,30 @@ void platform_thread(worker_t worker, struct worker_data *data)
 }
 
 struct platform_mutex {
-    HANDLE mutex;
+    CRITICAL_SECTION mutex;
 };
 
 platform_mutex_t platform_mutex_create(void)
 {
     platform_mutex_t mutex = malloc(sizeof(*mutex));
-    mutex->mutex = CreateMutex(NULL, FALSE, NULL);
+    InitializeCriticalSectionAndSpinCount(&mutex->mutex, 0x0400);
     return mutex;
 }
 
 void platform_mutex_free(platform_mutex_t mutex)
 {
-    CloseHandle(mutex->mutex);
+    DeleteCriticalSection(&mutex->mutex);
     free(mutex);
 }
 
 void platform_mutex_lock(platform_mutex_t mutex)
 {
-    WaitForSingleObject(mutex->mutex, INFINITE);
+    EnterCriticalSection(&mutex->mutex);
 }
 
 void platform_mutex_unlock(platform_mutex_t mutex)
 {
-    ReleaseMutex(mutex->mutex);
+    LeaveCriticalSection(&mutex->mutex);
 }
 
 void platform_terminal_init(void)
