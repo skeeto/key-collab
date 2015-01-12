@@ -50,7 +50,10 @@ void platform_mutex_unlock(platform_mutex_t mutex)
 
 void platform_terminal_init(void)
 {
-    system("cls"); // lazy way
+    COORD coord = {0, 0};
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD out;
+    FillConsoleOutputCharacter(handle, ' ', -1, coord, &out);
 }
 
 void platform_terminal_move(int row)
