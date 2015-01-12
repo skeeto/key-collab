@@ -54,19 +54,18 @@ void platform_mutex_unlock(platform_mutex_t mutex)
 
 void platform_terminal_init(void)
 {
-    printf("\x1b[2J");
+    puts("\x1b[2J");   // clear terminal
+    puts("\x1b[?25l"); // hide cursor
 }
 
 void platform_terminal_move(int row)
 {
-    printf("\x1b[H");             // move to top left
-    if (row > 0)
-        printf("\x1b[%dB", row);  // cursor down
+    printf("\x1b[%d;%df", row + 1, 0);
 }
 
 void platform_terminal_free(void)
 {
-    /* nothing */
+    puts("\x1b[?25l"); // show cursor
 }
 
 int platform_numcores(void)
