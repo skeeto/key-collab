@@ -88,9 +88,7 @@ static void print(int row, const char *format, ...)
     va_start(ap, format);
     vsprintf(buffer, format, ap);
     va_end(ap);
-    printf("\x1b[H");        // move to top left
-    if (row > 0)
-        printf("\x1b[%dB", row); // cursor down
+    platform_terminal_move(row);
     puts(buffer);
 }
 
@@ -134,16 +132,11 @@ static void worker(struct worker_data *data)
     }
 }
 
-static void clear(void)
-{
-    printf("\x1b[2J");
-}
-
 int main(void)
 {
     srand(time(NULL));
     wordlist_load();
-    clear();
+    platform_terminal_init();
     platform_mutex_t display_lock = platform_mutex_create();
     int ncores = platform_numcores();
 
@@ -168,5 +161,7 @@ int main(void)
         print(1, "rate:     %d keys/sec\n", total);
         platform_mutex_unlock(display_lock);
     }
+
+    platform_terminal_free();
     return 0;
 }

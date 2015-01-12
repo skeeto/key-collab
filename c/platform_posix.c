@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -49,6 +50,23 @@ void platform_mutex_lock(platform_mutex_t mutex)
 void platform_mutex_unlock(platform_mutex_t mutex)
 {
     pthread_mutex_unlock(&mutex->mutex);
+}
+
+void platform_terminal_init(void)
+{
+    printf("\x1b[2J");
+}
+
+void platform_terminal_move(int row)
+{
+    printf("\x1b[H");             // move to top left
+    if (row > 0)
+        printf("\x1b[%dB", row);  // cursor down
+}
+
+void platform_terminal_free(void)
+{
+    /* nothing */
 }
 
 int platform_numcores(void)

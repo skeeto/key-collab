@@ -48,6 +48,23 @@ void platform_mutex_unlock(platform_mutex_t mutex)
     ReleaseMutex(mutex->mutex);
 }
 
+void platform_terminal_init(void)
+{
+    system("cls"); // lazy way
+}
+
+void platform_terminal_move(int row)
+{
+    COORD coord = {0, row};
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleCursorPosition(handle, coord);
+}
+
+void platform_terminal_free(void)
+{
+    /* Nothing */
+}
+
 int platform_numcores(void)
 {
     SYSTEM_INFO sysinfo;
